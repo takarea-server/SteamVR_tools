@@ -1,2 +1,7 @@
 # 公開しない個人環境の確認結果(フルパス、ユーザー名などを含む)
 docs/private/
+
+# .NET build output
+bin/
+obj/
+*.user
