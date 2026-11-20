@@ -60,7 +60,7 @@ public class ModeSwitcher
                         restart = true;
                         if (!await _steamVr.CloseAsync(_closeTimeout))
                         {
-                            return Fail("SteamVR が時間内に終了しませんでした。設定は変更していません。");
+                            return Fail("SteamVR が時間内に終了しませんでした。設定は変更していません。SteamVR を手動で閉じてから、もう一度試してください。");
                         }
                         break;
                 }

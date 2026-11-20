@@ -15,6 +15,13 @@ public class SteamVrProcess : ISteamVrProcess
         || name.Equals(ServerName, StringComparison.OrdinalIgnoreCase)
         || name.Equals(StartupName, StringComparison.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// vrmonitor のステータスウィンドウ(Qt の Qt5QWindowIcon)だけを閉じる対象にする。
+    /// Process.MainWindowHandle は、ステータスウィンドウが非表示のとき内部の非表示ウィンドウを指して、閉じる要求が無視されるため使わない。
+    /// </summary>
+    public static bool ShouldCloseWindow(string className, bool visible, bool hasOwner) =>
+        !hasOwner && className == "Qt5QWindowIcon";
+
     public bool IsRunning() =>
         Probe(MonitorName) || Probe(ServerName) || Probe(StartupName);
 
@@ -24,7 +31,15 @@ public class SteamVrProcess : ISteamVrProcess
         {
             using (p)
             {
-                try { p.CloseMainWindow(); } catch (InvalidOperationException) { /* すでに終了 */ }
+                try
+                {
+                    // 閉じる要求が 1 件も送れなかったときだけ、従来の方法を試す。
+                    if (NativeWindows.PostCloseTo(p.Id, ShouldCloseWindow) == 0)
+                    {
+                        p.CloseMainWindow();
+                    }
+                }
+                catch (InvalidOperationException) { /* すでに終了 */ }
             }
         }
 
