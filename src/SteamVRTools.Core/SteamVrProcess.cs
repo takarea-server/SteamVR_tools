@@ -22,6 +22,11 @@ public class SteamVrProcess : ISteamVrProcess
     public static bool ShouldCloseWindow(string className, bool visible, bool hasOwner) =>
         !hasOwner && className == "Qt5QWindowIcon";
 
+    /// <summary>起動できたとみなすのは vrmonitor か vrserver が現れたとき。vrstartup は起動直後にも現れるので含めない。</summary>
+    public static bool IsStartedProcessName(string name) =>
+        name.Equals(MonitorName, StringComparison.OrdinalIgnoreCase)
+        || name.Equals(ServerName, StringComparison.OrdinalIgnoreCase);
+
     public bool IsRunning() =>
         Probe(MonitorName) || Probe(ServerName) || Probe(StartupName);
 
@@ -66,7 +71,7 @@ public class SteamVrProcess : ISteamVrProcess
             while (DateTime.UtcNow < deadline)
             {
                 await Task.Delay(500);
-                if (IsRunning())
+                if (Probe(MonitorName) || Probe(ServerName))
                 {
                     return true;
                 }

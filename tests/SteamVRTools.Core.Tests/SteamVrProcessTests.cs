@@ -11,8 +11,19 @@ public class SteamVrProcessTests
     [InlineData("vrstartup", true)] // 終了後も残り、Steam が「起動中」扱いを続ける
     [InlineData("steam", false)]
     [InlineData("vrcompositor", false)]
-    public void IsSteamVrProcessName_MatchesOnlyMonitorAndServer(string name, bool expected) =>
+    public void IsSteamVrProcessName_MatchesMonitorServerAndStartup(string name, bool expected) =>
         Assert.Equal(expected, SteamVrProcess.IsSteamVrProcessName(name));
+}
+
+public class SteamVrStartedTests
+{
+    [Theory]
+    [InlineData("vrmonitor", true)]
+    [InlineData("vrserver", true)]
+    [InlineData("vrstartup", false)] // 起動ヘルパーだけでは「起動できた」とはみなさない
+    [InlineData("steam", false)]
+    public void IsStartedProcessName_OnlyMonitorOrServer(string name, bool expected) =>
+        Assert.Equal(expected, SteamVrProcess.IsStartedProcessName(name));
 }
 
 public class VrMonitorWindowTests
