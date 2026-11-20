@@ -95,6 +95,20 @@ public class ModeSwitcherTests : IDisposable
     }
 
     [Fact]
+    public async Task Switch_Running_Restart_SteamVrDoesNotComeUp_ReturnsFailedButSettingStays()
+    {
+        var s = Create();
+        _vr.Running = true;
+        _vr.StartResult = false;
+
+        var r = await s.SwitchAsync(Mode.Beyond, Ask(RunningChoice.Restart));
+
+        Assert.Equal(SwitchOutcome.Failed, r.Outcome);
+        Assert.Contains("起動", r.ErrorMessage);
+        Assert.Equal(Mode.Beyond, s.CurrentMode()); // 設定は切り替わっている
+    }
+
+    [Fact]
     public async Task Switch_Running_Restart_CloseTimesOut_NoWriteNoStart_ReturnsFailed()
     {
         var s = Create();
@@ -178,6 +192,7 @@ public class ModeSwitcherTests : IDisposable
         public List<string> Calls { get; } = new();
         public Action? OnClose;
         public Action? OnStart;
+        public bool StartResult = true;
 
         public bool IsRunning() => Running;
 
@@ -189,10 +204,11 @@ public class ModeSwitcherTests : IDisposable
             return Task.FromResult(CloseResult);
         }
 
-        public void Start()
+        public Task<bool> StartAsync(TimeSpan timeout)
         {
             Calls.Add("start");
             OnStart?.Invoke();
+            return Task.FromResult(StartResult);
         }
     }
 }

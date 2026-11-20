@@ -26,13 +26,15 @@ public class ModeSwitcher
     private readonly BackupStore _backups;
     private readonly ISteamVrProcess _steamVr;
     private readonly TimeSpan _closeTimeout;
+    private readonly TimeSpan _startTimeout;
 
-    public ModeSwitcher(VrSettingsFile settings, BackupStore backups, ISteamVrProcess steamVr, TimeSpan closeTimeout)
+    public ModeSwitcher(VrSettingsFile settings, BackupStore backups, ISteamVrProcess steamVr, TimeSpan closeTimeout, TimeSpan? startTimeout = null)
     {
         _settings = settings;
         _backups = backups;
         _steamVr = steamVr;
         _closeTimeout = closeTimeout;
+        _startTimeout = startTimeout ?? TimeSpan.FromSeconds(40);
     }
 
     public Mode CurrentMode() => _settings.ReadMode();
@@ -72,13 +74,18 @@ public class ModeSwitcher
 
             if (restart)
             {
+                bool started;
                 try
                 {
-                    _steamVr.Start();
+                    started = await _steamVr.StartAsync(_startTimeout);
                 }
                 catch (Exception e)
                 {
                     return Fail($"設定は切り替えましたが、SteamVR を起動できませんでした: {e.Message}");
+                }
+                if (!started)
+                {
+                    return Fail("設定は切り替えましたが、SteamVR が起動しませんでした。手動で起動してください。");
                 }
                 return new SwitchResult(SwitchOutcome.SwitchedAndRestarted);
             }
