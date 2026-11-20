@@ -25,6 +25,8 @@ public class VrSettingsFile
 
     public VrSettingsFile(string path) => _path = path;
 
+    public string FilePath => _path;
+
     public Mode ReadMode()
     {
         var root = LoadRoot();
