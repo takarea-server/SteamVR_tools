@@ -60,6 +60,24 @@ public class BackupStoreTests : IDisposable
     }
 
     [Fact]
+    public void Create_ReadOnlySource_BackupsStillPrunable()
+    {
+        var src = Source("v1");
+        File.SetAttributes(src, FileAttributes.ReadOnly);
+        try
+        {
+            var store = new BackupStore(_backups, generations: 1);
+            store.Create(src);
+            store.Create(src); // 古いバックアップの削除が読み取り専用で失敗してはいけない
+            Assert.Single(Directory.GetFiles(_backups));
+        }
+        finally
+        {
+            File.SetAttributes(src, FileAttributes.Normal);
+        }
+    }
+
+    [Fact]
     public void Create_MissingSource_Throws()
     {
         var store = new BackupStore(_backups);

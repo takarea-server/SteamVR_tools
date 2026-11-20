@@ -175,6 +175,13 @@ public class TrayApp : ApplicationContext
 
     private void Quit()
     {
+        // 切り替え中に破棄すると、完了後の更新が破棄済みの部品に触れて落ちるため、終わるまで終了しない。
+        if (_busy)
+        {
+            _tray.ShowBalloonTip(2000, "SteamVR Tools", "切り替え中です。完了してから終了してください。", ToolTipIcon.Info);
+            return;
+        }
+
         _tray.Visible = false;
         _tray.Dispose();
         _form.Dispose();

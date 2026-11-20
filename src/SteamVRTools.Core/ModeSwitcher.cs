@@ -111,6 +111,13 @@ public class ModeSwitcher
         }
         catch (Exception e)
         {
+            // 書き込みは一時ファイル経由なので、置き換えに失敗した場合は元のファイルが無傷のことが多い。
+            // その場合は復元せず、変更していないと正しく伝える。
+            if (IsUnchanged(backup))
+            {
+                return $"設定を書き換えられませんでした。設定ファイルは変更していません: {e.Message}";
+            }
+
             try
             {
                 _backups.Restore(backup, _settings.FilePath);
@@ -120,6 +127,18 @@ public class ModeSwitcher
             {
                 return $"設定を書き換えられず、元に戻すのにも失敗しました。バックアップ: {backup} / {e.Message} / {restoreError.Message}";
             }
+        }
+    }
+
+    private bool IsUnchanged(string backup)
+    {
+        try
+        {
+            return File.ReadAllBytes(backup).AsSpan().SequenceEqual(File.ReadAllBytes(_settings.FilePath));
+        }
+        catch (Exception)
+        {
+            return false;
         }
     }
 

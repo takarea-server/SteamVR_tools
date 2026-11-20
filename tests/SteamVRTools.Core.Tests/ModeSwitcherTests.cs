@@ -129,6 +129,28 @@ public class ModeSwitcherTests : IDisposable
     }
 
     [Fact]
+    public async Task Switch_ReadOnlyFile_FailsWithoutFalseRestoreAlarm_FileUnchanged()
+    {
+        var s = Create();
+        var before = File.ReadAllBytes(_settingsPath);
+        File.SetAttributes(_settingsPath, FileAttributes.ReadOnly);
+        try
+        {
+            var r = await s.SwitchAsync(Mode.Beyond, Ask(RunningChoice.Cancel));
+
+            Assert.Equal(SwitchOutcome.Failed, r.Outcome);
+            // 元のファイルは無傷なので、「元に戻すのにも失敗」と誤警告してはいけない。
+            Assert.DoesNotContain("元に戻すのにも失敗", r.ErrorMessage);
+            Assert.Contains("変更していません", r.ErrorMessage);
+        }
+        finally
+        {
+            File.SetAttributes(_settingsPath, FileAttributes.Normal);
+        }
+        Assert.Equal(before, File.ReadAllBytes(_settingsPath));
+    }
+
+    [Fact]
     public async Task Switch_InvalidJson_ReturnsFailedWithMessage_FileUnchanged()
     {
         var s = Create("{ broken");

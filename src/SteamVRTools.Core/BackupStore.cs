@@ -33,6 +33,8 @@ public class BackupStore
         } while (File.Exists(path));
 
         File.Copy(sourceFile, path);
+        // 元が読み取り専用だとコピーも読み取り専用になり、後の世代削除や復元ができなくなる。
+        File.SetAttributes(path, FileAttributes.Normal);
         Prune(name);
         return path;
     }
