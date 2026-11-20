@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/SteamVRTools.App/SteamVRTools.App.csproj" />
     <Project Path="src/SteamVRTools.Core/SteamVRTools.Core.csproj" />
   </Folder>
   <Folder Name="/tests/">

@@ -4,3 +4,4 @@ docs/private/
 # .NET build output
 bin/
 obj/
+*.user
