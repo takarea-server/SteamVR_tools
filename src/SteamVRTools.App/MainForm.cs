@@ -4,8 +4,8 @@ namespace SteamVRTools.App;
 public class MainForm : Form
 {
     private readonly Label _status = new() { AutoSize = true, Font = new Font("Segoe UI", 12f, FontStyle.Bold) };
-    private readonly Button _pico = new() { Text = "Pico モード", Width = 140, Height = 40 };
-    private readonly Button _beyond = new() { Text = "Beyond モード", Width = 140, Height = 40 };
+    private readonly NoFocusButton _pico = new() { Text = "Pico モード", Width = 140, Height = 40 };
+    private readonly NoFocusButton _beyond = new() { Text = "Beyond モード", Width = 140, Height = 40 };
 
     public event Action? PicoRequested;
     public event Action? BeyondRequested;
@@ -32,5 +32,15 @@ public class MainForm : Form
     {
         _pico.Enabled = !busy;
         _beyond.Enabled = !busy;
+    }
+}
+
+/// <summary>キーボードフォーカスを受け取らないボタン。開いた直後の青い枠や、Enter での誤操作を防ぐ。マウス操作は通常どおり。</summary>
+internal sealed class NoFocusButton : Button
+{
+    public NoFocusButton()
+    {
+        SetStyle(ControlStyles.Selectable, false);
+        TabStop = false;
     }
 }
